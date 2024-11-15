@@ -1,0 +1,26 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the dataset
+# Dataset link: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+data = pd.read_csv("creditcard.csv")
+
+# Explore the data
+print(data.head())
+print(data.info())
+
+# Check for class imbalance
+print(data["Class"].value_counts())
+sns.countplot(x="Class", data=data)
+plt.title("Class Distribution (0 = Legitimate, 1 = Fraudulent)")
+plt.show()
+
+# Preprocess the data
+# Separate features (X) and target (y)
+X = data.drop(columns=["Class"])
+y
