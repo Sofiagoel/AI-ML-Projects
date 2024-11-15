@@ -1,0 +1,45 @@
+import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import CountVectorizer
+
+# Load the dataset
+# You can download a dataset from: https://grouplens.org/datasets/movielens/
+movies = pd.read_csv('movies.csv')  # Contains movieId, title, genres
+ratings = pd.read_csv('ratings.csv')  # Contains userId, movieId, rating
+
+# Merge the datasets on 'movieId'
+movie_data = pd.merge(ratings, movies, on='movieId')
+
+# Create a pivot table for collaborative filtering
+user_movie_matrix = movie_data.pivot_table(index='userId', columns='title', values='rating')
+
+# Fill missing values with 0 (optional)
+user_movie_matrix.fillna(0, inplace=True)
+
+# Calculate the cosine similarity between movies
+similarity_matrix = cosine_similarity(user_movie_matrix.T)
+
+# Convert it to a DataFrame for better visualization
+similarity_df = pd.DataFrame(similarity_matrix, index=user_movie_matrix.columns, columns=user_movie_matrix.columns)
+
+# Recommendation Function
+def recommend_movies(movie_title, num_recommendations=5):
+    if movie_title not in similarity_df.columns:
+        return f"Movie '{movie_title}' not found in the database."
+    
+    # Get the similarity scores for the given movie
+    similar_movies = similarity_df[movie_title].sort_values(ascending=False)
+    
+    # Exclude the input movie and get the top N recommendations
+    recommendations = similar_movies.iloc[1:num_recommendations + 1]
+    
+    return recommendations
+
+# Example: Recommend movies similar to 'Toy Story (1995)'
+movie_title = "Toy Story (1995)"
+recommendations = recommend_movies(movie_title, num_recommendations=5)
+
+# Display the recommendations
+print(f"Movies similar to '{movie_title}':")
+for title, score in recommendations.items():
+    print(f"{title}: Similarity Score = {score:.2f}")
